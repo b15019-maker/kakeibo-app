@@ -160,12 +160,12 @@ button.danger{
 }
 
 .day{
-  min-height:82px;
+  min-height:94px;
   border-right:1px solid var(--line);
   border-bottom:1px solid var(--line);
-  padding:5px 4px;
+  padding:6px 3px;
   background:#0e1117;
-  overflow:hidden;
+  overflow:visible;
 }
 
 .day.empty{
@@ -184,12 +184,14 @@ button.danger{
   color:var(--green);
   font-size:10px;
   line-height:1.25;
+  white-space:nowrap;
 }
 
 .dayExpense{
   color:var(--red);
   font-size:10px;
   line-height:1.25;
+  white-space:nowrap;
 }
 
 .dayBalance{
@@ -279,10 +281,12 @@ button.danger{
 .hidden{display:none!important}
 
 @media(max-width:520px){
-  .app{padding-left:8px;padding-right:8px}
-  .day{min-height:70px;padding:4px 2px}
+  .app{padding-left:6px;padding-right:6px}
+  #calendarPage > .card{padding-left:6px;padding-right:6px}
+  .day{min-height:88px;padding:5px 2px}
   .date{font-size:11px}
-  .dayIncome,.dayExpense,.dayBalance{font-size:9px}
+  .dayIncome,.dayExpense{font-size:9px;white-space:nowrap;letter-spacing:-0.2px}
+  .dayBalance{font-size:9px}
   .summary .value{font-size:14px}
 }
 </style>
@@ -622,6 +626,12 @@ function save(){
 function yen(n){
 
   return "¥"+Math.round(n||0).toLocaleString();
+
+}
+
+function signedYen(n,type){
+
+  return (type==="income"?"+":"-")+yen(Math.abs(n||0));
 
 }
 
@@ -1145,10 +1155,10 @@ function render(){
     el.innerHTML=
       '<div class="date">'+current.getDate()+'</div>'
       +(income
-        ?'<div class="dayIncome">+'+yen(income)+'</div>'
+        ?'<div class="dayIncome">'+signedYen(income,"income")+'</div>'
         :"")
       +(expense
-        ?'<div class="dayExpense">-'+yen(expense)+'</div>'
+        ?'<div class="dayExpense">'+signedYen(expense,"expense")+'</div>'
         :"");
 
     cal.appendChild(el);
