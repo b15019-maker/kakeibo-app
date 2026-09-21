@@ -1054,10 +1054,24 @@ function allItemsForRange(start,end){
 
 function render(){
 
+  const range=
+    accountingRange(
+      viewYear,
+      viewMonth
+    );
+
+  const sameMonth=
+    range.start.getFullYear()===range.end.getFullYear()
+    && range.start.getMonth()===range.end.getMonth();
+
   document.getElementById(
     "monthTitle"
   ).textContent=
-    viewYear+"年 "+(viewMonth+1)+"月";
+    sameMonth
+      ? range.start.getFullYear()+"年 "+(range.start.getMonth()+1)+"月"
+      : (range.start.getMonth()+1)+"/"+range.start.getDate()
+        +" ～ "
+        +(range.end.getMonth()+1)+"/"+range.end.getDate();
 
   const cal=
     document.getElementById(
@@ -1066,53 +1080,36 @@ function render(){
 
   cal.innerHTML="";
 
-  const firstDay=
-    new Date(
-      viewYear,
-      viewMonth,
-      1
-    ).getDay();
-
-  const days=
-    new Date(
-      viewYear,
-      viewMonth+1,
-      0
-    ).getDate();
-
-  const items=
-    allItemsForMonth(
-      viewYear,
-      viewMonth
+  const rangeItems=
+    allItemsForRange(
+      range.start,
+      range.end
     );
+
+  const firstDay=range.start.getDay();
 
   for(let i=0;i<firstDay;i++){
 
     const empty=
       document.createElement("div");
 
-    empty.className=
-      "day empty";
+    empty.className="day empty";
 
     cal.appendChild(empty);
 
   }
 
+  for(
+    let date=new Date(range.start);
+    date<=range.end;
+    date.setDate(date.getDate()+1)
+  ){
 
-  for(let d=1;d<=days;d++){
-
-    const date=
-      new Date(
-        viewYear,
-        viewMonth,
-        d
-      );
-
-    const ds=
-      dateString(date);
+    const current=new Date(date);
+    const ds=dateString(current);
 
     const dayItems=
-      items.filter(
+      rangeItems.filter(
         x=>x.date===ds
       );
 
@@ -1137,42 +1134,26 @@ function render(){
 
     el.className="day";
 
-    if(date.getDay()===0){
+    if(current.getDay()===0){
       el.classList.add("sun");
     }
 
-    if(date.getDay()===6){
+    if(current.getDay()===6){
       el.classList.add("sat");
     }
 
     el.innerHTML=
-      '<div class="date">'+d+'</div>'
+      '<div class="date">'+current.getDate()+'</div>'
       +(income
         ?'<div class="dayIncome">+'+yen(income)+'</div>'
         :"")
       +(expense
         ?'<div class="dayExpense">-'+yen(expense)+'</div>'
-        :"")
-      +((income||expense)
-        ?'<div class="dayBalance">'+yen(income-expense)+'</div>'
         :"");
 
     cal.appendChild(el);
 
   }
-
-
-  const range=
-    accountingRange(
-      viewYear,
-      viewMonth
-    );
-
-  const rangeItems=
-    allItemsForRange(
-      range.start,
-      range.end
-    );
 
   const totalIncome=
     rangeItems
@@ -1207,14 +1188,15 @@ function render(){
     );
 
   balanceEl.textContent=
-    yen(balance);
+    balance<0
+      ? "-"+yen(Math.abs(balance))
+      : yen(balance);
 
   balanceEl.className=
     "value "+
     (balance>=0
       ?"income"
       :"expense");
-
 
   renderMonthItems(
     rangeItems,
@@ -1228,7 +1210,6 @@ function render(){
   refreshCategories();
 
 }
-
 
 function renderMonthItems(items,range){
 
@@ -1283,9 +1264,8 @@ function renderMonthItems(items,range){
         :"expense")
       +'">'
       +(x.type==="income"
-        ?"+"
-        :"-")
-      +yen(x.amount)
+        ?"+"+yen(x.amount)
+        :"-"+yen(x.amount))
       +'</div>'
       +'</div>';
 
@@ -1699,9 +1679,8 @@ function renderFixedList(){
         :"expense")
       +'">'
       +(f.type==="income"
-        ?"+"
-        :"-")
-      +yen(f.amount)
+        ?"+"+yen(f.amount)
+        :"-"+yen(f.amount))
       +'</div>'
       +'</div>';
 
