@@ -1,26 +1,2010 @@
-<!doctype html><html lang='ja'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><meta name='theme-color' content='#090b10'><title>家計簿 Ver.6</title><style>
-:root{--bg:#090b10;--card:#141821;--card2:#1b2130;--line:#2c3445;--text:#f5f7fb;--muted:#9ba6b8;--blue:#5da8ff;--green:#4fd18b;--red:#ff6b7a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Noto Sans JP',sans-serif}.app{max-width:620px;margin:auto;min-height:100vh;padding:14px 14px 96px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}.label{font-size:12px;color:var(--muted)}.value{font-weight:800;margin-top:4px}.income{color:var(--green)}.expense{color:var(--red)}h2{font-size:19px;margin:18px 0 12px}.toolbar{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}.iconbtn,button,input,select{font:inherit}.iconbtn{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}.week,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week div{text-align:center;font-size:12px;color:var(--muted);padding:5px}.sun{color:var(--red)!important}.sat{color:var(--blue)!important}.day{min-height:72px;border:1.5px solid #3b4559;border-radius:10px;background:#111722;padding:6px;font-size:12px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)}.cal>div:empty{min-height:72px;border:1px solid #202838;border-radius:10px;background:#0c1017}.day .n{font-weight:700}.amt{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}.form{display:grid;gap:12px}.field label{display:block;font-size:13px;margin-bottom:5px;color:#dbe2ee}input,select{width:100%;height:48px;background:#10141d;color:var(--text);border:1px solid #3b4559;border-radius:12px;padding:0 12px;font-size:16px}.primary{width:100%;height:50px;border:0;border-radius:12px;background:#2879e8;color:white;font-weight:800}.msg{min-height:20px;font-size:13px;color:var(--green)}.list{display:grid;gap:9px}.row{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px}.rowtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.small{font-size:12px;color:var(--muted);margin-top:5px}.danger{border:1px solid #60404a;background:#21161a;color:#ff9aa4;border-radius:10px;padding:9px 12px}.category-add{display:grid;grid-template-columns:1fr auto;gap:8px}.category-add button{border:0;background:#2879e8;color:#fff;border-radius:12px;padding:0 18px;font-weight:700}.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(9,11,16,.97);border-top:1px solid var(--line);padding:7px max(8px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;z-index:5}.nav button{min-height:58px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--muted);font-size:10px;padding:5px 2px}.nav button.active{background:#14263e;border-color:#315b89;color:white}.nav b{display:block;font-size:18px;margin-bottom:2px}.page{display:none}.page.active{display:block}.sep{border-top:1px solid var(--line);margin-top:22px;padding-top:18px}.empty{text-align:center;color:var(--muted);padding:24px 10px;border:1px dashed var(--line);border-radius:12px}.hint{font-size:13px;color:var(--muted);line-height:1.55}.pill{display:inline-block;font-size:11px;padding:3px 7px;border-radius:99px;background:var(--card2);color:var(--muted);margin-right:4px}
-</style></head><body><main class='app'>
-<div class='summary'><div class='card'><div class='label'>収入</div><div id='sumIn' class='value income'>¥0</div></div><div class='card'><div class='label'>支出</div><div id='sumOut' class='value expense'>¥0</div></div><div class='card'><div class='label'>収支</div><div id='sumBal' class='value'>¥0</div></div></div>
-<section id='calendar' class='page active'><div class='toolbar'><button id='prev' class='iconbtn'>‹</button><strong id='monthTitle'></strong><button id='next' class='iconbtn'>›</button></div><div class='week'><div class='sun'>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class='sat'>土</div></div><div id='cal' class='cal'></div></section>
-<section id='entry' class='page'><h2>収支入力</h2><form id='entryForm' class='form'><div class='field'><label>種類</label><select id='entryType'><option value='expense'>支出</option><option value='income'>収入</option></select></div><div class='field'><label>日付</label><input id='entryDate' type='date' required></div><div class='field'><label>金額</label><input id='entryAmount' type='number' inputmode='numeric' min='1' required></div><div class='field'><label>カテゴリー</label><select id='entryCategory'></select></div><div class='field'><label>メモ</label><input id='entryMemo' type='text' maxlength='80'></div><button class='primary'>登録する</button><div id='entryMsg' class='msg'></div></form></section>
-<section id='fixed' class='page'><h2>固定費を追加</h2><form id='fixedForm' class='form'><div class='field'><label>種類</label><select id='fixedType'><option value='expense'>固定費</option><option value='income'>給料・定期収入</option></select></div><div class='field'><label>名前</label><input id='fixedName' type='text' placeholder='家賃・給料など' required></div><div class='field'><label>金額</label><input id='fixedAmount' type='number' inputmode='numeric' min='1' required></div><div class='field'><label>周期</label><select id='fixedFreq'><option value='daily'>毎日</option><option value='monthly' selected>毎月</option><option value='bimonthly'>2ヶ月毎</option><option value='yearly'>毎年</option></select></div><div class='field'><label>基準日</label><input id='fixedDate' type='date' required></div><div class='field'><label>土日の処理</label><select id='fixedWeekend'><option value='same'>そのまま</option><option value='previous'>直前の平日</option><option value='next'>直後の平日</option></select></div><div class='field'><label>カテゴリー</label><select id='fixedCategory'></select></div><button class='primary'>固定費を登録</button><div id='fixedMsg' class='msg'></div></form></section>
-<section id='fixedlist' class='page'><h2>固定費リスト</h2><div id='fixedStats' class='hint'></div><div id='fixedList' class='list' style='margin-top:12px'></div></section>
-<section id='settings' class='page'><h2>設定</h2><div class='field'><label>家計簿の開始日</label><select id='startDay'></select></div><div class='field' style='margin-top:12px'><label>開始日が土日の場合</label><select id='startWeekend'><option value='same'>そのまま</option><option value='previous'>直前の平日</option><option value='next'>直後の平日</option></select></div><p class='hint'>例：25日を選び「直後の平日」にすると、25日が土日の月は次の平日から1か月として集計します。</p><div class='sep'><h2 style='margin-top:0'>カテゴリー設定</h2><p class='hint'>下の欄に好きな名前を入力して「追加」を押してください。</p><form id='categoryForm' class='category-add'><input id='categoryName' type='text' maxlength='30' placeholder='例：外食、ガソリン、子ども用品' autocomplete='off'><button type='submit'>追加</button></form><div id='categoryMsg' class='msg'></div><div id='categoryList' class='list'></div></div></section>
-</main><nav class='nav'><button data-page='calendar' class='active'><b>▦</b>カレンダー</button><button data-page='entry'><b>＋</b>収支入力</button><button data-page='fixed'><b>¥</b>固定費</button><button data-page='fixedlist'><b>☷</b>固定費リスト</button><button data-page='settings'><b>⚙</b>設定</button></nav>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>家計簿</title>
+
+<style>
+:root{
+  --bg:#090b10;
+  --card:#141821;
+  --card2:#1b202b;
+  --line:#2a303c;
+  --text:#f5f7fa;
+  --sub:#9da6b5;
+  --green:#39d98a;
+  --red:#ff5d68;
+  --blue:#5aa7ff;
+  --accent:#7c8cff;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.app{
+  max-width:760px;
+  margin:auto;
+  padding:16px 14px 100px;
+}
+
+h1{
+  font-size:24px;
+  margin:4px 0 16px;
+}
+
+h2{
+  font-size:20px;
+  margin:6px 0 16px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:14px;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.summary .card{
+  margin:0;
+  padding:12px 8px;
+  text-align:center;
+}
+
+.label{
+  font-size:12px;
+  color:var(--sub);
+  margin-bottom:5px;
+}
+
+.value{
+  font-size:17px;
+  font-weight:700;
+}
+
+.income{color:var(--green)}
+.expense{color:var(--red)}
+
+.page{display:none}
+.page.active{display:block}
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+input,
+select{
+  width:100%;
+  padding:13px 12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--card2);
+  color:var(--text);
+  margin-top:6px;
+  margin-bottom:14px;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 14px;
+  background:var(--accent);
+  color:white;
+  font-weight:600;
+}
+
+button.secondary{
+  background:var(--card2);
+  border:1px solid var(--line);
+}
+
+button.danger{
+  background:#63252c;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.monthbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.monthtitle{
+  font-size:19px;
+  font-weight:700;
+}
+
+.week{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+  margin-bottom:5px;
+}
+
+.week div{
+  font-size:12px;
+  color:var(--sub);
+  padding:5px 0;
+}
+
+.week .sat{color:var(--blue)}
+.week .sun{color:var(--red)}
+
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+
+.day{
+  min-height:82px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:5px 4px;
+  background:#0e1117;
+  overflow:hidden;
+}
+
+.day.empty{
+  background:#0a0c10;
+}
+
+.date{
+  font-size:12px;
+  margin-bottom:5px;
+}
+
+.sat .date{color:var(--blue)}
+.sun .date{color:var(--red)}
+
+.dayIncome{
+  color:var(--green);
+  font-size:10px;
+  line-height:1.25;
+}
+
+.dayExpense{
+  color:var(--red);
+  font-size:10px;
+  line-height:1.25;
+}
+
+.dayBalance{
+  margin-top:3px;
+  font-size:10px;
+  color:#d9deea;
+}
+
+.listItem{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:13px;
+  margin-bottom:10px;
+}
+
+.listTop{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.listName{
+  font-weight:700;
+}
+
+.listSub{
+  color:var(--sub);
+  font-size:13px;
+  margin-top:5px;
+  line-height:1.5;
+}
+
+.listActions{
+  margin-top:10px;
+}
+
+.small{
+  color:var(--sub);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.categoryRow{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.categoryRow span{
+  flex:1;
+  padding:11px;
+  background:var(--card2);
+  border-radius:10px;
+}
+
+.categoryRow button{
+  padding:8px 12px;
+}
+
+.nav{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:20;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  background:#10131a;
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+.nav button{
+  border-radius:0;
+  background:transparent;
+  color:var(--sub);
+  font-size:11px;
+  padding:13px 2px;
+}
+
+.nav button.active{
+  color:white;
+  background:#1a1f2a;
+}
+
+.hidden{display:none!important}
+
+@media(max-width:520px){
+  .app{padding-left:8px;padding-right:8px}
+  .day{min-height:70px;padding:4px 2px}
+  .date{font-size:11px}
+  .dayIncome,.dayExpense,.dayBalance{font-size:9px}
+  .summary .value{font-size:14px}
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<h1>家計簿</h1>
+
+<div class="summary">
+  <div class="card">
+    <div class="label">収入</div>
+    <div id="sumIncome" class="value income">¥0</div>
+  </div>
+
+  <div class="card">
+    <div class="label">支出</div>
+    <div id="sumExpense" class="value expense">¥0</div>
+  </div>
+
+  <div class="card">
+    <div class="label">収支</div>
+    <div id="sumBalance" class="value">¥0</div>
+  </div>
+</div>
+
+<section id="calendarPage" class="page active">
+
+<div class="card">
+
+  <div class="monthbar">
+    <button class="secondary" onclick="moveMonth(-1)">◀</button>
+    <div id="monthTitle" class="monthtitle"></div>
+    <button class="secondary" onclick="moveMonth(1)">▶</button>
+  </div>
+
+  <div class="week">
+    <div class="sun">日</div>
+    <div>月</div>
+    <div>火</div>
+    <div>水</div>
+    <div>木</div>
+    <div>金</div>
+    <div class="sat">土</div>
+  </div>
+
+  <div id="calendar" class="calendar"></div>
+
+</div>
+
+<div class="card">
+  <h2>この期間の明細</h2>
+  <div id="monthItems"></div>
+</div>
+
+</section>
+
+
+<section id="entryPage" class="page">
+
+<h2>収支入力</h2>
+
+<div class="card">
+
+<label>種類</label>
+<select id="entryType">
+  <option value="expense">支出</option>
+  <option value="income">収入</option>
+</select>
+
+<label>日付</label>
+<input id="entryDate" type="date">
+
+<label>カテゴリー</label>
+<select id="entryCategory"></select>
+
+<label>内容</label>
+<input id="entryName" type="text" placeholder="例：スーパー">
+
+<label>金額</label>
+<input id="entryAmount" type="number" inputmode="numeric" placeholder="例：3000">
+
+<button onclick="addEntry()">登録する</button>
+
+</div>
+
+</section>
+
+
+<section id="fixedPage" class="page">
+
+<h2>固定費</h2>
+
+<div class="card">
+
+<label>種類</label>
+<select id="fixedType">
+  <option value="expense">支出</option>
+  <option value="income">収入</option>
+</select>
+
+<label>カテゴリー</label>
+<select id="fixedCategory"></select>
+
+<label>内容</label>
+<input id="fixedName" type="text" placeholder="例：家賃">
+
+<label>金額</label>
+<input id="fixedAmount" type="number" inputmode="numeric" placeholder="例：65000">
+
+<label>繰り返し</label>
+<select id="fixedRepeat" onchange="repeatChanged()">
+  <option value="monthly">毎月</option>
+  <option value="every2">2か月ごと</option>
+  <option value="yearly">毎年</option>
+  <option value="daily">毎日</option>
+  <option value="nthweekday">第○ ○曜日</option>
+</select>
+
+<div id="normalDateArea">
+
+<label>開始日</label>
+<input id="fixedStart" type="date">
+
+</div>
+
+<div id="nthWeekdayArea" class="hidden">
+
+<div class="row">
+
+<div>
+<label>第何週</label>
+<select id="fixedNth">
+  <option value="1">第1</option>
+  <option value="2">第2</option>
+  <option value="3">第3</option>
+  <option value="4">第4</option>
+  <option value="5">第5</option>
+</select>
+</div>
+
+<div>
+<label>曜日</label>
+<select id="fixedWeekday">
+  <option value="0">日曜日</option>
+  <option value="1">月曜日</option>
+  <option value="2">火曜日</option>
+  <option value="3">水曜日</option>
+  <option value="4">木曜日</option>
+  <option value="5">金曜日</option>
+  <option value="6">土曜日</option>
+</select>
+</div>
+
+</div>
+
+<label>開始月</label>
+<input id="fixedNthStart" type="month">
+
+</div>
+
+<label>土日だった場合</label>
+<select id="fixedAdjust">
+  <option value="none">そのまま</option>
+  <option value="previous">直前の平日</option>
+  <option value="next">直後の平日</option>
+</select>
+
+<button onclick="addFixed()">固定費を登録</button>
+
+</div>
+
+</section>
+
+
+<section id="fixedListPage" class="page">
+
+<h2>固定費リスト</h2>
+
+<div id="fixedList"></div>
+
+</section>
+
+
+<section id="settingsPage" class="page">
+
+<h2>設定</h2>
+
+<div class="card">
+
+<label>家計簿の開始日</label>
+<input id="accountStart" type="date">
+
+<label>開始日が土日の場合</label>
+<select id="accountAdjust">
+  <option value="none">そのまま</option>
+  <option value="previous">直前の平日</option>
+  <option value="next">直後の平日</option>
+</select>
+
+<p class="small">
+設定した開始日から翌月の開始日前日までを1か月として集計します。
+</p>
+
+<button onclick="saveSettings()">設定を保存</button>
+
+</div>
+
+<div class="card">
+
+<h2>カテゴリー</h2>
+
+<div class="categoryRow">
+  <input id="newCategory" type="text" placeholder="新しいカテゴリー名" style="margin:0">
+  <button onclick="addCategory()">追加</button>
+</div>
+
+<div id="categoryList"></div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<nav class="nav">
+
+<button class="active" data-page="calendarPage">
+カレンダー
+</button>
+
+<button data-page="entryPage">
+収支入力
+</button>
+
+<button data-page="fixedPage">
+固定費
+</button>
+
+<button data-page="fixedListPage">
+固定費リスト
+</button>
+
+<button data-page="settingsPage">
+設定
+</button>
+
+</nav>
+
+
 <script>
-const KEY='kakeibo_v6_data';const defaults={entries:[],fixed:[],categories:['食費','日用品','家賃','光熱費','通信費','交通費','保険','給料','その他'],startDay:1,startWeekend:'same'};let state=(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return structuredClone(defaults)}})();let view=new Date();const $=s=>document.querySelector(s);const yen=n=>'¥'+Math.round(n||0).toLocaleString('ja-JP');const save=()=>localStorage.setItem(KEY,JSON.stringify(state));const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
-function refreshCategories(){const opts=state.categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');$('#entryCategory').innerHTML=opts;$('#fixedCategory').innerHTML=opts;$('#categoryList').innerHTML=state.categories.map((c,i)=>`<div class='row rowtop'><strong>${esc(c)}</strong><button class='danger' data-delcat='${i}' type='button'>削除</button></div>`).join('')}
-function adjusted(date,rule){let d=new Date(date);if(rule==='previous'){if(d.getDay()===6)d.setDate(d.getDate()-1);else if(d.getDay()===0)d.setDate(d.getDate()-2)}if(rule==='next'){if(d.getDay()===6)d.setDate(d.getDate()+2);else if(d.getDay()===0)d.setDate(d.getDate()+1)}return d}
-function occurrencesFor(y,m){const out=[];state.fixed.forEach(f=>{const b=parse(f.date);const add=d=>{const a=adjusted(d,f.weekend);if(a.getFullYear()===y&&a.getMonth()===m)out.push({...f,date:iso(a),generated:true})};if(f.freq==='daily'){for(let d=1;d<=new Date(y,m+1,0).getDate();d++)add(new Date(y,m,d))}else if(f.freq==='monthly'){add(new Date(y,m,Math.min(b.getDate(),new Date(y,m+1,0).getDate())))}else if(f.freq==='bimonthly'){const diff=(y-b.getFullYear())*12+m-b.getMonth();if(diff>=0&&diff%2===0)add(new Date(y,m,Math.min(b.getDate(),new Date(y,m+1,0).getDate())))}else if(f.freq==='yearly'&&m===b.getMonth()&&y>=b.getFullYear()){add(new Date(y,m,Math.min(b.getDate(),new Date(y,m+1,0).getDate())))}});return out}
-function accountingRange(y,m){const s=state.startDay,rule=state.startWeekend||'same';if(s===1&&rule==='same')return [new Date(y,m,1),new Date(y,m+1,1)];const start=adjusted(new Date(y,m-1,s),rule),end=adjusted(new Date(y,m,s),rule);return [start,end]}
-function allItemsForRange(start,end){const items=[...state.entries];for(let d=new Date(start);d<end;d.setMonth(d.getMonth()+1)){items.push(...occurrencesFor(d.getFullYear(),d.getMonth()))}return items.filter(x=>{const d=parse(x.date);return d>=start&&d<end})}
-function render(){const y=view.getFullYear(),m=view.getMonth();$('#monthTitle').textContent=`${y}年 ${m+1}月`;const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),fixed=occurrencesFor(y,m);let html='';for(let i=0;i<first;i++)html+='<div></div>';for(let d=1;d<=days;d++){const ds=iso(new Date(y,m,d)),items=[...state.entries.filter(x=>x.date===ds),...fixed.filter(x=>x.date===ds)],inc=items.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount),0),exp=items.filter(x=>x.type==='expense').reduce((a,x)=>a+Number(x.amount),0),dow=new Date(y,m,d).getDay();html+=`<div class='day'><div class='n ${dow===0?'sun':dow===6?'sat':''}'>${d}</div>${inc?`<div class='amt income'>+${yen(inc)}</div>`:''}${exp?`<div class='amt expense'>-${yen(exp)}</div>`:''}</div>`}$('#cal').innerHTML=html;const [start,end]=accountingRange(y,m),items=allItemsForRange(start,end),inc=items.filter(x=>x.type==='income').reduce((a,x)=>a+Number(x.amount),0),exp=items.filter(x=>x.type==='expense').reduce((a,x)=>a+Number(x.amount),0);$('#sumIn').textContent=yen(inc);$('#sumOut').textContent=yen(exp);$('#sumBal').textContent=yen(inc-exp);$('#sumBal').className='value '+(inc-exp>=0?'income':'expense');renderFixedList()}
-function renderFixedList(){const freq={daily:'毎日',monthly:'毎月',bimonthly:'2ヶ月毎',yearly:'毎年'},weekend={same:'そのまま',previous:'直前の平日',next:'直後の平日'};$('#fixedStats').textContent=`${state.fixed.length}件登録`;$('#fixedList').innerHTML=state.fixed.length?state.fixed.map((f,i)=>`<div class='row'><div class='rowtop'><div><strong>${esc(f.name)}</strong><div class='value ${f.type==='income'?'income':'expense'}'>${yen(f.amount)}</div></div><button type='button' class='danger' data-delfixed='${i}'>削除</button></div><div class='small'><span class='pill'>${freq[f.freq]}</span><span class='pill'>${esc(f.category)}</span><br>基準日 ${esc(f.date)} ・ 土日 ${weekend[f.weekend]}</div></div>`).join(''):`<div class='empty'>固定費はまだ登録されていません。</div>`}
-$('.nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(!b)return;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('#'+b.dataset.page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});$('#prev').onclick=()=>{view=new Date(view.getFullYear(),view.getMonth()-1,1);render()};$('#next').onclick=()=>{view=new Date(view.getFullYear(),view.getMonth()+1,1);render()};
-$('#categoryForm').addEventListener('submit',e=>{e.preventDefault();const input=$('#categoryName'),name=input.value.trim(),msg=$('#categoryMsg');if(!name){msg.textContent='カテゴリー名を入力してください';input.focus();return}if(state.categories.some(c=>c.toLowerCase()===name.toLowerCase())){msg.textContent='同じカテゴリーがすでにあります';return}state.categories.push(name);save();refreshCategories();input.value='';msg.textContent=`「${name}」を追加しました`;input.focus()});
-$('#entryForm').addEventListener('submit',e=>{e.preventDefault();state.entries.push({id:crypto.randomUUID(),type:$('#entryType').value,date:$('#entryDate').value,amount:Number($('#entryAmount').value),category:$('#entryCategory').value,memo:$('#entryMemo').value});save();$('#entryAmount').value='';$('#entryMemo').value='';$('#entryMsg').textContent='登録しました';render()});
-$('#fixedForm').addEventListener('submit',e=>{e.preventDefault();state.fixed.push({id:crypto.randomUUID(),type:$('#fixedType').value,name:$('#fixedName').value.trim(),amount:Number($('#fixedAmount').value),freq:$('#fixedFreq').value,date:$('#fixedDate').value,weekend:$('#fixedWeekend').value,category:$('#fixedCategory').value});save();$('#fixedName').value='';$('#fixedAmount').value='';$('#fixedMsg').textContent='固定費リストに登録しました';render()});
-document.addEventListener('click',e=>{const c=e.target.closest('[data-delcat]');if(c){state.categories.splice(Number(c.dataset.delcat),1);if(!state.categories.length)state.categories=['その他'];save();refreshCategories()}const f=e.target.closest('[data-delfixed]');if(f){state.fixed.splice(Number(f.dataset.delfixed),1);save();render()}});
-$('#startDay').innerHTML=Array.from({length:28},(_,i)=>`<option value='${i+1}'>毎月 ${i+1}日</option>`).join('');$('#startDay').value=state.startDay;$('#startDay').onchange=e=>{state.startDay=Number(e.target.value);save();render()};$('#startWeekend').value=state.startWeekend||'same';$('#startWeekend').onchange=e=>{state.startWeekend=e.target.value;save();render()};const today=iso(new Date());$('#entryDate').value=today;$('#fixedDate').value=today;refreshCategories();render();
-</script></body></html>
+
+const KEY="kakeibo_v7_data";
+
+const defaultData={
+  entries:[],
+  fixed:[],
+  categories:[
+    "食費",
+    "日用品",
+    "交通費",
+    "住宅",
+    "光熱費",
+    "通信費",
+    "保険",
+    "医療",
+    "娯楽",
+    "その他"
+  ],
+  accountStart:"",
+  accountAdjust:"none"
+};
+
+let data=loadData();
+
+let today=new Date();
+
+let viewYear=today.getFullYear();
+let viewMonth=today.getMonth();
+
+
+function loadData(){
+
+  try{
+
+    const v7=localStorage.getItem(KEY);
+
+    if(v7){
+      return Object.assign(
+        {},
+        defaultData,
+        JSON.parse(v7)
+      );
+    }
+
+    const old=localStorage.getItem("kakeibo_v6_data");
+
+    if(old){
+
+      const parsed=JSON.parse(old);
+
+      const converted=Object.assign(
+        {},
+        defaultData,
+        parsed
+      );
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(converted)
+      );
+
+      return converted;
+    }
+
+  }catch(e){}
+
+  return JSON.parse(
+    JSON.stringify(defaultData)
+  );
+}
+
+
+function save(){
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+
+function yen(n){
+
+  return "¥"+Math.round(n||0).toLocaleString();
+
+}
+
+
+function pad(n){
+
+  return String(n).padStart(2,"0");
+
+}
+
+
+function dateString(d){
+
+  return d.getFullYear()
+    +"-"
+    +pad(d.getMonth()+1)
+    +"-"
+    +pad(d.getDate());
+
+}
+
+
+function parseDate(s){
+
+  const p=s.split("-").map(Number);
+
+  return new Date(
+    p[0],
+    p[1]-1,
+    p[2]
+  );
+
+}
+
+
+function adjusted(date,rule){
+
+  let d=new Date(date);
+
+  if(rule==="previous"){
+
+    if(d.getDay()===6){
+      d.setDate(d.getDate()-1);
+    }
+
+    if(d.getDay()===0){
+      d.setDate(d.getDate()-2);
+    }
+
+  }
+
+  if(rule==="next"){
+
+    if(d.getDay()===6){
+      d.setDate(d.getDate()+2);
+    }
+
+    if(d.getDay()===0){
+      d.setDate(d.getDate()+1);
+    }
+
+  }
+
+  return d;
+
+}
+
+
+function nthWeekdayDate(year,month,nth,weekday){
+
+  const first=new Date(
+    year,
+    month,
+    1
+  );
+
+  const diff=
+    (weekday-first.getDay()+7)%7;
+
+  const day=
+    1+diff+(nth-1)*7;
+
+  const result=new Date(
+    year,
+    month,
+    day
+  );
+
+  if(result.getMonth()!==month){
+    return null;
+  }
+
+  return result;
+
+}
+
+
+function monthsBetween(a,b){
+
+  return(
+    (b.getFullYear()-a.getFullYear())*12
+    +
+    b.getMonth()-a.getMonth()
+  );
+
+}
+
+
+function fixedOccurrencesForMonth(year,month){
+
+  const result=[];
+
+  data.fixed.forEach(f=>{
+
+    if(f.repeat==="nthweekday"){
+
+      if(!f.nthStart)return;
+
+      const p=f.nthStart.split("-");
+
+      const startMonth=new Date(
+        Number(p[0]),
+        Number(p[1])-1,
+        1
+      );
+
+      const targetMonth=new Date(
+        year,
+        month,
+        1
+      );
+
+      if(targetMonth<startMonth)return;
+
+      let d=nthWeekdayDate(
+        year,
+        month,
+        Number(f.nth),
+        Number(f.weekday)
+      );
+
+      if(!d)return;
+
+      d=adjusted(
+        d,
+        f.adjust||"none"
+      );
+
+      result.push({
+        id:"fixed-"+f.id+"-"+dateString(d),
+        fixedId:f.id,
+        type:f.type,
+        category:f.category,
+        name:f.name,
+        amount:Number(f.amount),
+        date:dateString(d),
+        fixed:true
+      });
+
+      return;
+    }
+
+
+    if(!f.start)return;
+
+    const start=parseDate(f.start);
+
+    if(f.repeat==="daily"){
+
+      const last=new Date(
+        year,
+        month+1,
+        0
+      );
+
+      for(
+        let d=new Date(year,month,1);
+        d<=last;
+        d.setDate(d.getDate()+1)
+      ){
+
+        if(d<start)continue;
+
+        const ad=adjusted(
+          d,
+          f.adjust||"none"
+        );
+
+        result.push({
+          id:"fixed-"+f.id+"-"+dateString(ad),
+          fixedId:f.id,
+          type:f.type,
+          category:f.category,
+          name:f.name,
+          amount:Number(f.amount),
+          date:dateString(ad),
+          fixed:true
+        });
+
+      }
+
+      return;
+    }
+
+
+    const target=new Date(
+      year,
+      month,
+      1
+    );
+
+    const startMonth=new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      1
+    );
+
+    if(target<startMonth)return;
+
+    const diff=monthsBetween(
+      startMonth,
+      target
+    );
+
+    let valid=false;
+
+    if(f.repeat==="monthly"){
+      valid=true;
+    }
+
+    if(f.repeat==="every2"){
+      valid=diff%2===0;
+    }
+
+    if(f.repeat==="yearly"){
+      valid=
+        month===start.getMonth();
+    }
+
+    if(!valid)return;
+
+    let day=start.getDate();
+
+    const lastDay=
+      new Date(
+        year,
+        month+1,
+        0
+      ).getDate();
+
+    day=Math.min(
+      day,
+      lastDay
+    );
+
+    let d=new Date(
+      year,
+      month,
+      day
+    );
+
+    d=adjusted(
+      d,
+      f.adjust||"none"
+    );
+
+    result.push({
+      id:"fixed-"+f.id+"-"+dateString(d),
+      fixedId:f.id,
+      type:f.type,
+      category:f.category,
+      name:f.name,
+      amount:Number(f.amount),
+      date:dateString(d),
+      fixed:true
+    });
+
+  });
+
+  return result;
+
+}
+
+
+function allItemsForMonth(year,month){
+
+  const first=
+    dateString(
+      new Date(year,month,1)
+    );
+
+  const last=
+    dateString(
+      new Date(year,month+1,0)
+    );
+
+  const entries=
+    data.entries.filter(
+      x=>x.date>=first&&x.date<=last
+    );
+
+  return entries.concat(
+    fixedOccurrencesForMonth(
+      year,
+      month
+    )
+  );
+
+}
+
+
+function accountingRange(year,month){
+
+  if(!data.accountStart){
+
+    return{
+      start:new Date(year,month,1),
+      end:new Date(year,month+1,0)
+    };
+
+  }
+
+  const base=parseDate(
+    data.accountStart
+  );
+
+  const day=base.getDate();
+
+  let start=
+    new Date(
+      year,
+      month,
+      Math.min(
+        day,
+        new Date(
+          year,
+          month+1,
+          0
+        ).getDate()
+      )
+    );
+
+  start=adjusted(
+    start,
+    data.accountAdjust||"none"
+  );
+
+  let next=
+    new Date(
+      year,
+      month+1,
+      Math.min(
+        day,
+        new Date(
+          year,
+          month+2,
+          0
+        ).getDate()
+      )
+    );
+
+  next=adjusted(
+    next,
+    data.accountAdjust||"none"
+  );
+
+  const end=
+    new Date(
+      next.getFullYear(),
+      next.getMonth(),
+      next.getDate()-1
+    );
+
+  return{
+    start,
+    end
+  };
+
+}
+
+
+function allItemsForRange(start,end){
+
+  const first=dateString(start);
+  const last=dateString(end);
+
+  const entries=
+    data.entries.filter(
+      x=>x.date>=first&&x.date<=last
+    );
+
+  const fixed=[];
+
+  let cursor=
+    new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      1
+    );
+
+  const finish=
+    new Date(
+      end.getFullYear(),
+      end.getMonth(),
+      1
+    );
+
+  while(cursor<=finish){
+
+    fixed.push(
+      ...fixedOccurrencesForMonth(
+        cursor.getFullYear(),
+        cursor.getMonth()
+      )
+    );
+
+    cursor.setMonth(
+      cursor.getMonth()+1
+    );
+  }
+
+  return entries.concat(
+    fixed.filter(
+      x=>x.date>=first&&x.date<=last
+    )
+  );
+
+}
+
+
+function render(){
+
+  document.getElementById(
+    "monthTitle"
+  ).textContent=
+    viewYear+"年 "+(viewMonth+1)+"月";
+
+  const cal=
+    document.getElementById(
+      "calendar"
+    );
+
+  cal.innerHTML="";
+
+  const firstDay=
+    new Date(
+      viewYear,
+      viewMonth,
+      1
+    ).getDay();
+
+  const days=
+    new Date(
+      viewYear,
+      viewMonth+1,
+      0
+    ).getDate();
+
+  const items=
+    allItemsForMonth(
+      viewYear,
+      viewMonth
+    );
+
+  for(let i=0;i<firstDay;i++){
+
+    const empty=
+      document.createElement("div");
+
+    empty.className=
+      "day empty";
+
+    cal.appendChild(empty);
+
+  }
+
+
+  for(let d=1;d<=days;d++){
+
+    const date=
+      new Date(
+        viewYear,
+        viewMonth,
+        d
+      );
+
+    const ds=
+      dateString(date);
+
+    const dayItems=
+      items.filter(
+        x=>x.date===ds
+      );
+
+    const income=
+      dayItems
+      .filter(x=>x.type==="income")
+      .reduce(
+        (a,b)=>a+Number(b.amount),
+        0
+      );
+
+    const expense=
+      dayItems
+      .filter(x=>x.type==="expense")
+      .reduce(
+        (a,b)=>a+Number(b.amount),
+        0
+      );
+
+    const el=
+      document.createElement("div");
+
+    el.className="day";
+
+    if(date.getDay()===0){
+      el.classList.add("sun");
+    }
+
+    if(date.getDay()===6){
+      el.classList.add("sat");
+    }
+
+    el.innerHTML=
+      '<div class="date">'+d+'</div>'
+      +(income
+        ?'<div class="dayIncome">+'+yen(income)+'</div>'
+        :"")
+      +(expense
+        ?'<div class="dayExpense">-'+yen(expense)+'</div>'
+        :"")
+      +((income||expense)
+        ?'<div class="dayBalance">'+yen(income-expense)+'</div>'
+        :"");
+
+    cal.appendChild(el);
+
+  }
+
+
+  const range=
+    accountingRange(
+      viewYear,
+      viewMonth
+    );
+
+  const rangeItems=
+    allItemsForRange(
+      range.start,
+      range.end
+    );
+
+  const totalIncome=
+    rangeItems
+      .filter(x=>x.type==="income")
+      .reduce(
+        (a,b)=>a+Number(b.amount),
+        0
+      );
+
+  const totalExpense=
+    rangeItems
+      .filter(x=>x.type==="expense")
+      .reduce(
+        (a,b)=>a+Number(b.amount),
+        0
+      );
+
+  document.getElementById(
+    "sumIncome"
+  ).textContent=yen(totalIncome);
+
+  document.getElementById(
+    "sumExpense"
+  ).textContent=yen(totalExpense);
+
+  const balance=
+    totalIncome-totalExpense;
+
+  const balanceEl=
+    document.getElementById(
+      "sumBalance"
+    );
+
+  balanceEl.textContent=
+    yen(balance);
+
+  balanceEl.className=
+    "value "+
+    (balance>=0
+      ?"income"
+      :"expense");
+
+
+  renderMonthItems(
+    rangeItems,
+    range
+  );
+
+  renderFixedList();
+
+  renderCategories();
+
+  refreshCategories();
+
+}
+
+
+function renderMonthItems(items,range){
+
+  const box=
+    document.getElementById(
+      "monthItems"
+    );
+
+  box.innerHTML=
+    '<div class="small" style="margin-bottom:10px">'
+    +dateString(range.start)
+    +" ～ "
+    +dateString(range.end)
+    +"</div>";
+
+  if(!items.length){
+
+    box.innerHTML+=
+      '<div class="small">登録はありません。</div>';
+
+    return;
+  }
+
+  const sorted=
+    [...items].sort(
+      (a,b)=>a.date.localeCompare(b.date)
+    );
+
+  sorted.forEach(x=>{
+
+    const div=
+      document.createElement("div");
+
+    div.className="listItem";
+
+    div.innerHTML=
+      '<div class="listTop">'
+      +'<div>'
+      +'<div class="listName">'
+      +escapeHtml(x.name)
+      +'</div>'
+      +'<div class="listSub">'
+      +x.date
+      +" ・ "
+      +escapeHtml(x.category||"")
+      +(x.fixed?" ・ 固定":"")
+      +'</div>'
+      +'</div>'
+      +'<div class="'
+      +(x.type==="income"
+        ?"income"
+        :"expense")
+      +'">'
+      +(x.type==="income"
+        ?"+"
+        :"-")
+      +yen(x.amount)
+      +'</div>'
+      +'</div>';
+
+    if(!x.fixed){
+
+      const actions=
+        document.createElement("div");
+
+      actions.className=
+        "listActions";
+
+      const btn=
+        document.createElement("button");
+
+      btn.className="danger";
+
+      btn.textContent="削除";
+
+      btn.onclick=()=>{
+        deleteEntry(x.id);
+      };
+
+      actions.appendChild(btn);
+
+      div.appendChild(actions);
+
+    }
+
+    box.appendChild(div);
+
+  });
+
+}
+
+
+function moveMonth(n){
+
+  viewMonth+=n;
+
+  if(viewMonth<0){
+    viewMonth=11;
+    viewYear--;
+  }
+
+  if(viewMonth>11){
+    viewMonth=0;
+    viewYear++;
+  }
+
+  render();
+
+}
+
+
+function addEntry(){
+
+  const type=
+    document.getElementById(
+      "entryType"
+    ).value;
+
+  const date=
+    document.getElementById(
+      "entryDate"
+    ).value;
+
+  const category=
+    document.getElementById(
+      "entryCategory"
+    ).value;
+
+  const name=
+    document.getElementById(
+      "entryName"
+    ).value.trim();
+
+  const amount=
+    Number(
+      document.getElementById(
+        "entryAmount"
+      ).value
+    );
+
+  if(!date||!name||!amount){
+
+    alert(
+      "日付・内容・金額を入力してください。"
+    );
+
+    return;
+  }
+
+  data.entries.push({
+    id:Date.now(),
+    type,
+    date,
+    category,
+    name,
+    amount
+  });
+
+  save();
+
+  document.getElementById(
+    "entryName"
+  ).value="";
+
+  document.getElementById(
+    "entryAmount"
+  ).value="";
+
+  render();
+
+  alert("登録しました。");
+
+}
+
+
+function deleteEntry(id){
+
+  if(!confirm(
+    "この明細を削除しますか？"
+  ))return;
+
+  data.entries=
+    data.entries.filter(
+      x=>x.id!==id
+    );
+
+  save();
+  render();
+
+}
+
+
+function repeatChanged(){
+
+  const repeat=
+    document.getElementById(
+      "fixedRepeat"
+    ).value;
+
+  const nth=
+    repeat==="nthweekday";
+
+  document.getElementById(
+    "normalDateArea"
+  ).classList.toggle(
+    "hidden",
+    nth
+  );
+
+  document.getElementById(
+    "nthWeekdayArea"
+  ).classList.toggle(
+    "hidden",
+    !nth
+  );
+
+}
+
+
+function addFixed(){
+
+  const type=
+    document.getElementById(
+      "fixedType"
+    ).value;
+
+  const category=
+    document.getElementById(
+      "fixedCategory"
+    ).value;
+
+  const name=
+    document.getElementById(
+      "fixedName"
+    ).value.trim();
+
+  const amount=
+    Number(
+      document.getElementById(
+        "fixedAmount"
+      ).value
+    );
+
+  const repeat=
+    document.getElementById(
+      "fixedRepeat"
+    ).value;
+
+  const adjust=
+    document.getElementById(
+      "fixedAdjust"
+    ).value;
+
+  if(!name||!amount){
+
+    alert(
+      "内容と金額を入力してください。"
+    );
+
+    return;
+  }
+
+  const item={
+    id:Date.now(),
+    type,
+    category,
+    name,
+    amount,
+    repeat,
+    adjust
+  };
+
+
+  if(repeat==="nthweekday"){
+
+    const nthStart=
+      document.getElementById(
+        "fixedNthStart"
+      ).value;
+
+    if(!nthStart){
+
+      alert(
+        "開始月を入力してください。"
+      );
+
+      return;
+    }
+
+    item.nth=
+      Number(
+        document.getElementById(
+          "fixedNth"
+        ).value
+      );
+
+    item.weekday=
+      Number(
+        document.getElementById(
+          "fixedWeekday"
+        ).value
+      );
+
+    item.nthStart=nthStart;
+
+  }else{
+
+    const start=
+      document.getElementById(
+        "fixedStart"
+      ).value;
+
+    if(!start){
+
+      alert(
+        "開始日を入力してください。"
+      );
+
+      return;
+    }
+
+    item.start=start;
+
+  }
+
+
+  data.fixed.push(item);
+
+  save();
+
+  document.getElementById(
+    "fixedName"
+  ).value="";
+
+  document.getElementById(
+    "fixedAmount"
+  ).value="";
+
+  render();
+
+  alert(
+    "固定費を登録しました。"
+  );
+
+}
+
+
+function repeatText(f){
+
+  if(f.repeat==="daily"){
+    return "毎日";
+  }
+
+  if(f.repeat==="monthly"){
+    return "毎月";
+  }
+
+  if(f.repeat==="every2"){
+    return "2か月ごと";
+  }
+
+  if(f.repeat==="yearly"){
+    return "毎年";
+  }
+
+  if(f.repeat==="nthweekday"){
+
+    const names=[
+      "日",
+      "月",
+      "火",
+      "水",
+      "木",
+      "金",
+      "土"
+    ];
+
+    return(
+      "毎月 第"
+      +f.nth
+      +" "
+      +names[f.weekday]
+      +"曜日"
+    );
+
+  }
+
+  return "";
+}
+
+
+function adjustText(v){
+
+  if(v==="previous"){
+    return "直前の平日";
+  }
+
+  if(v==="next"){
+    return "直後の平日";
+  }
+
+  return "そのまま";
+
+}
+
+
+function renderFixedList(){
+
+  const box=
+    document.getElementById(
+      "fixedList"
+    );
+
+  box.innerHTML="";
+
+  if(!data.fixed.length){
+
+    box.innerHTML=
+      '<div class="card small">固定費はまだ登録されていません。</div>';
+
+    return;
+  }
+
+
+  data.fixed.forEach(f=>{
+
+    const div=
+      document.createElement("div");
+
+    div.className="listItem";
+
+    let startText="";
+
+    if(f.repeat==="nthweekday"){
+
+      startText=
+        "開始月："
+        +(f.nthStart||"-");
+
+    }else{
+
+      startText=
+        "開始日："
+        +(f.start||"-");
+
+    }
+
+    div.innerHTML=
+      '<div class="listTop">'
+      +'<div>'
+      +'<div class="listName">'
+      +escapeHtml(f.name)
+      +'</div>'
+      +'<div class="listSub">'
+      +escapeHtml(f.category||"")
+      +" ・ "
+      +repeatText(f)
+      +"<br>"
+      +startText
+      +"<br>"
+      +"土日："
+      +adjustText(f.adjust)
+      +'</div>'
+      +'</div>'
+      +'<div class="'
+      +(f.type==="income"
+        ?"income"
+        :"expense")
+      +'">'
+      +(f.type==="income"
+        ?"+"
+        :"-")
+      +yen(f.amount)
+      +'</div>'
+      +'</div>';
+
+    const actions=
+      document.createElement("div");
+
+    actions.className=
+      "listActions";
+
+    const btn=
+      document.createElement("button");
+
+    btn.className="danger";
+
+    btn.textContent="削除";
+
+    btn.onclick=()=>{
+
+      if(!confirm(
+        "この固定費を削除しますか？"
+      ))return;
+
+      data.fixed=
+        data.fixed.filter(
+          x=>x.id!==f.id
+        );
+
+      save();
+      render();
+
+    };
+
+    actions.appendChild(btn);
+
+    div.appendChild(actions);
+
+    box.appendChild(div);
+
+  });
+
+}
+
+
+function refreshCategories(){
+
+  const ids=[
+    "entryCategory",
+    "fixedCategory"
+  ];
+
+  ids.forEach(id=>{
+
+    const select=
+      document.getElementById(id);
+
+    if(!select)return;
+
+    const current=
+      select.value;
+
+    select.innerHTML="";
+
+    data.categories.forEach(c=>{
+
+      const option=
+        document.createElement(
+          "option"
+        );
+
+      option.value=c;
+      option.textContent=c;
+
+      select.appendChild(option);
+
+    });
+
+    if(
+      data.categories.includes(
+        current
+      )
+    ){
+      select.value=current;
+    }
+
+  });
+
+}
+
+
+function addCategory(){
+
+  const input=
+    document.getElementById(
+      "newCategory"
+    );
+
+  const name=
+    input.value.trim();
+
+  if(!name)return;
+
+  if(
+    data.categories.includes(name)
+  ){
+
+    alert(
+      "同じカテゴリーがあります。"
+    );
+
+    return;
+  }
+
+  data.categories.push(name);
+
+  input.value="";
+
+  save();
+  render();
+
+}
+
+
+function renderCategories(){
+
+  const box=
+    document.getElementById(
+      "categoryList"
+    );
+
+  box.innerHTML="";
+
+  data.categories.forEach(c=>{
+
+    const row=
+      document.createElement("div");
+
+    row.className="categoryRow";
+
+    const span=
+      document.createElement("span");
+
+    span.textContent=c;
+
+    const btn=
+      document.createElement("button");
+
+    btn.className="danger";
+
+    btn.textContent="削除";
+
+    btn.onclick=()=>{
+
+      if(
+        data.categories.length<=1
+      ){
+
+        alert(
+          "カテゴリーは最低1つ必要です。"
+        );
+
+        return;
+      }
+
+      if(!confirm(
+        "「"+c+"」を削除しますか？"
+      ))return;
+
+      data.categories=
+        data.categories.filter(
+          x=>x!==c
+        );
+
+      save();
+      render();
+
+    };
+
+    row.appendChild(span);
+    row.appendChild(btn);
+
+    box.appendChild(row);
+
+  });
+
+}
+
+
+function saveSettings(){
+
+  data.accountStart=
+    document.getElementById(
+      "accountStart"
+    ).value;
+
+  data.accountAdjust=
+    document.getElementById(
+      "accountAdjust"
+    ).value;
+
+  save();
+  render();
+
+  alert(
+    "設定を保存しました。"
+  );
+
+}
+
+
+function escapeHtml(s){
+
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+document
+.querySelectorAll(".nav button")
+.forEach(btn=>{
+
+  btn.addEventListener(
+    "click",
+    ()=>{
+
+      document
+      .querySelectorAll(".page")
+      .forEach(
+        p=>p.classList.remove(
+          "active"
+        )
+      );
+
+      document
+      .querySelectorAll(
+        ".nav button"
+      )
+      .forEach(
+        b=>b.classList.remove(
+          "active"
+        )
+      );
+
+      document
+      .getElementById(
+        btn.dataset.page
+      )
+      .classList.add(
+        "active"
+      );
+
+      btn.classList.add(
+        "active"
+      );
+
+      if(
+        btn.dataset.page===
+        "fixedListPage"
+      ){
+        renderFixedList();
+      }
+
+    }
+  );
+
+});
+
+
+const todayString=
+  dateString(new Date());
+
+document.getElementById(
+  "entryDate"
+).value=todayString;
+
+document.getElementById(
+  "fixedStart"
+).value=todayString;
+
+document.getElementById(
+  "fixedNthStart"
+).value=
+  todayString.slice(0,7);
+
+document.getElementById(
+  "accountStart"
+).value=
+  data.accountStart||"";
+
+document.getElementById(
+  "accountAdjust"
+).value=
+  data.accountAdjust||"none";
+
+repeatChanged();
+
+render();
+
+</script>
+
+</body>
+</html>
