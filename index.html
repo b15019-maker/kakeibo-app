@@ -180,6 +180,22 @@ button.danger{
 .sat .date{color:var(--blue)}
 .sun .date{color:var(--red)}
 
+
+.day.today .date{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:26px;
+  height:26px;
+  padding:0 6px;
+  margin:-3px 0 2px -2px;
+  border-radius:999px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+}
+
+
 .dayIncome{
   color:var(--green);
   font-size:10px;
@@ -1143,6 +1159,17 @@ function render(){
       document.createElement("div");
 
     el.className="day";
+
+    const now=new Date();
+
+    if(
+      date.getFullYear()===now.getFullYear()
+      && date.getMonth()===now.getMonth()
+      && date.getDate()===now.getDate()
+    ){
+      el.classList.add("today");
+    }
+
 
     if(current.getDay()===0){
       el.classList.add("sun");
